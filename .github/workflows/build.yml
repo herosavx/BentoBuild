@@ -11,18 +11,16 @@ jobs:
     runs-on: ubuntu-22.04
     
     steps:
-    # Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    # Set up Android NDK
     - name: Setup Android NDK
+      id: setup-ndk
       uses: nttld/setup-ndk@v1
       with:
         ndk-version: ${{ env.NDK_VERSION }}
         add-to-path: true
         
-    # Install dependencies
     - name: Install build dependencies
       run: |
         sudo apt-get update
@@ -31,14 +29,21 @@ jobs:
         chmod +x cmake-${{ env.CMAKE_VERSION }}-linux-x86_64.sh
         sudo ./cmake-${{ env.CMAKE_VERSION }}-linux-x86_64.sh --skip-license --prefix=/usr/local
         
-    # Clone Bento4
     - name: Clone Bento4
       run: |
         git clone --recurse-submodules https://github.com/axiomatic-systems/Bento4.git
         cd Bento4
         git checkout v1.6.0-641
         
-    # Build for Android architectures
+    - name: Verify NDK installation
+      run: |
+        echo "NDK Path: ${{ steps.setup-ndk.outputs.ndk-path }}"
+        if [ ! -d "${{ steps.setup-ndk.outputs.ndk-path }}" ]; then
+          echo "NDK directory not found!"
+          exit 1
+        fi
+        ls -la "${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake"
+        
     - name: Build Bento4 Static Libs
       working-directory: Bento4
       run: |
@@ -54,7 +59,7 @@ jobs:
           cd $ARCH
           
           cmake \
-            -DCMAKE_TOOLCHAIN_FILE=${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake \
+            -DCMAKE_TOOLCHAIN_FILE="${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake" \
             -DANDROID_ABI=$ARCH \
             -DANDROID_PLATFORM=android-${API_LEVEL} \
             -DANDROID_STL=c++_static \
@@ -68,7 +73,6 @@ jobs:
           cd ..
         done
         
-    # Prepare artifacts
     - name: Prepare artifacts
       run: |
         mkdir -p artifacts
@@ -80,7 +84,6 @@ jobs:
           cp -r ../../Source/C++/Headers/* ../../artifacts/$ARCH/include/
         done
         
-    # Upload artifacts
     - name: Upload Android Static Libs
       uses: actions/upload-artifact@v4
       with:
