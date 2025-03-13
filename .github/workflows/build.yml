@@ -1,11 +1,6 @@
 name: Build Bento4 Android Static Libs
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+on: [workflow_dispatch]
 
 env:
   NDK_VERSION: r26d
