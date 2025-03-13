@@ -42,7 +42,6 @@ jobs:
           echo "NDK directory not found!"
           exit 1
         fi
-        ls -la "${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake"
         
     - name: Build Bento4 Static Libs
       working-directory: Bento4
@@ -69,8 +68,17 @@ jobs:
             -G Ninja \
             ../..
             
-          ninja -j$(nproc)
+          ninja ap4 -j$(nproc)  # Only build the ap4 target
           cd ..
+        done
+        
+    - name: Debug build output
+      run: |
+        cd Bento4/build-android
+        for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do
+          echo "Contents of $ARCH:"
+          ls -R $ARCH
+          find $ARCH -name "*.a"
         done
         
     - name: Prepare artifacts
@@ -80,7 +88,7 @@ jobs:
         for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do
           mkdir -p ../../artifacts/$ARCH/lib
           mkdir -p ../../artifacts/$ARCH/include
-          cp $ARCH/lib/*.a ../../artifacts/$ARCH/lib/
+          cp $ARCH/libap4.a ../../artifacts/$ARCH/lib/  # Explicitly copy libap4.a
           cp -r ../../Source/C++/Headers/* ../../artifacts/$ARCH/include/
         done
         
