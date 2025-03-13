@@ -95,7 +95,7 @@ jobs:
           mkdir -p ../../artifacts/$ARCH/lib
           mkdir -p ../../artifacts/$ARCH/include
           cp $ARCH/libap4.a ../../artifacts/$ARCH/lib/
-          cp ../../bento4-repo/Source/C++/Core/*.h ../../artifacts/$ARCH/include/
+          cp ../../bento4-repo/Source/C++/*/*.h ../../artifacts/$ARCH/include/
         done
         
     - name: Upload Android Static Libs
