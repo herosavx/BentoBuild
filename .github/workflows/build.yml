@@ -75,9 +75,7 @@ jobs:
     - name: Debug build output
       run: |
         cd Bento4
-        echo "Listing root directory:"
-        ls -la
-        echo "Checking Source/C++/Headers:"
+        echo "Listing Source/C++/Headers:"
         ls -la Source/C++/Headers || echo "Headers directory not found"
         cd build-android
         for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do
@@ -94,8 +92,7 @@ jobs:
           mkdir -p ../../artifacts/$ARCH/lib
           mkdir -p ../../artifacts/$ARCH/include
           cp $ARCH/libap4.a ../../artifacts/$ARCH/lib/
-          # Use absolute path from Bento4 root and handle missing files gracefully
-          cp ../../Source/C++/Headers/*.h ../../artifacts/$ARCH/include/ || echo "No header files found to copy"
+          cp ../../Source/C++/Headers/*.h ../../artifacts/$ARCH/include/
         done
         
     - name: Upload Android Static Libs
