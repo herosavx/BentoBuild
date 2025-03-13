@@ -31,9 +31,11 @@ jobs:
         
     - name: Clone Bento4
       run: |
-        git clone --recurse-submodules https://github.com/axiomatic-systems/Bento4.git
-        cd Bento4
+        git clone --recurse-submodules https://github.com/axiomatic-systems/Bento4.git bento4-repo
+        cd bento4-repo
         git checkout v1.6.0-641
+        pwd
+        ls -la
         
     - name: Verify NDK installation
       run: |
@@ -44,7 +46,7 @@ jobs:
         fi
         
     - name: Build Bento4 Static Libs
-      working-directory: Bento4
+      working-directory: bento4-repo
       run: |
         mkdir -p build-android
         cd build-android
@@ -74,10 +76,11 @@ jobs:
         
     - name: Debug build output
       run: |
-        cd Bento4
-        echo "Listing Source/C++/Headers:"
-        ls -la Source/C++/Headers || echo "Headers directory not found"
-        cd build-android
+        echo "Listing repository root:"
+        ls -la bento4-repo
+        echo "Listing Source/C++/Core (headers):"
+        ls -la bento4-repo/Source/C++/Core | grep "\.h$" || echo "No .h files found"
+        cd bento4-repo/build-android
         for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do
           echo "Contents of $ARCH:"
           ls -R $ARCH
@@ -87,12 +90,12 @@ jobs:
     - name: Prepare artifacts
       run: |
         mkdir -p artifacts
-        cd Bento4/build-android
+        cd bento4-repo/build-android
         for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do
           mkdir -p ../../artifacts/$ARCH/lib
           mkdir -p ../../artifacts/$ARCH/include
           cp $ARCH/libap4.a ../../artifacts/$ARCH/lib/
-          cp ../../Source/C++/Headers/*.h ../../artifacts/$ARCH/include/
+          cp ../../bento4-repo/Source/C++/Core/*.h ../../artifacts/$ARCH/include/
         done
         
     - name: Upload Android Static Libs
